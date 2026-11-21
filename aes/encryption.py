@@ -96,5 +96,38 @@ def gf_mul(a, b):
         b >>= 1
 
     return result
+# -------------------------------------------------
+# 6. MIXCOLUMNS
+# -------------------------------------------------
+
+def mix_columns(state):
+    """Mix each column using AES matrix multiplication."""
+    result = [[0] * 4 for _ in range(4)]
+
+    for col in range(4):
+        a0, a1, a2, a3 = [
+            state[row][col] for row in range(4)
+        ]
+
+        result[0][col] = (
+            gf_mul(a0, 2) ^ gf_mul(a1, 3) ^ a2 ^ a3
+        )
+
+        result[1][col] = (
+            a0 ^ gf_mul(a1, 2) ^ gf_mul(a2, 3) ^ a3
+        )
+
+        result[2][col] = (
+            a0 ^ a1 ^ gf_mul(a2, 2) ^ gf_mul(a3, 3)
+        )
+
+        result[3][col] = (
+            gf_mul(a0, 3) ^ a1 ^ a2 ^ gf_mul(a3, 2)
+        )
+
+    return result
+
+
+
 
 
