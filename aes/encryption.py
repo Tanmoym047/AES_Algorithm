@@ -51,5 +51,83 @@ def state_to_bytes(state):
         for col in range(4)
         for row in range(4)
     )
+# -------------------------------------------------
+# 3. SUBBYTES
+# -------------------------------------------------
+
+def sub_bytes(state):
+    """Substitute every byte using the AES S-Box."""
+    return [
+        [S_BOX[value] for value in row]
+        for row in state
+    ]
+
+
+# -------------------------------------------------
+# 4. SHIFTROWS
+# -------------------------------------------------
+
+def shift_rows(state):
+    """Shift row r cyclically left by r positions."""
+    return [
+        row[r:] + row[:r]
+        for r, row in enumerate(state)
+    ]
+
+
+# -------------------------------------------------
+# 5. GALOIS FIELD MULTIPLICATION
+# -------------------------------------------------
+
+def gf_mul(a, b):
+    """Multiply two bytes in GF(2^8)."""
+    result = 0
+
+    for _ in range(8):
+        if b & 1:
+            result ^= a
+
+        high_bit = a & 0x80
+        a = (a << 1) & 0xFF
+
+        if high_bit:
+            a ^= 0x1B
+
+        b >>= 1
+
+    return result
+# -------------------------------------------------
+# 6. MIXCOLUMNS
+# -------------------------------------------------
+
+def mix_columns(state):
+    """Mix each column using AES matrix multiplication."""
+    result = [[0] * 4 for _ in range(4)]
+
+    for col in range(4):
+        a0, a1, a2, a3 = [
+            state[row][col] for row in range(4)
+        ]
+
+        result[0][col] = (
+            gf_mul(a0, 2) ^ gf_mul(a1, 3) ^ a2 ^ a3
+        )
+
+        result[1][col] = (
+            a0 ^ gf_mul(a1, 2) ^ gf_mul(a2, 3) ^ a3
+        )
+
+        result[2][col] = (
+            a0 ^ a1 ^ gf_mul(a2, 2) ^ gf_mul(a3, 3)
+        )
+
+        result[3][col] = (
+            gf_mul(a0, 3) ^ a1 ^ a2 ^ gf_mul(a3, 2)
+        )
+
+    return result
+
+
+
 
 
