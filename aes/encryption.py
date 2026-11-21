@@ -51,5 +51,50 @@ def state_to_bytes(state):
         for col in range(4)
         for row in range(4)
     )
+# -------------------------------------------------
+# 3. SUBBYTES
+# -------------------------------------------------
+
+def sub_bytes(state):
+    """Substitute every byte using the AES S-Box."""
+    return [
+        [S_BOX[value] for value in row]
+        for row in state
+    ]
+
+
+# -------------------------------------------------
+# 4. SHIFTROWS
+# -------------------------------------------------
+
+def shift_rows(state):
+    """Shift row r cyclically left by r positions."""
+    return [
+        row[r:] + row[:r]
+        for r, row in enumerate(state)
+    ]
+
+
+# -------------------------------------------------
+# 5. GALOIS FIELD MULTIPLICATION
+# -------------------------------------------------
+
+def gf_mul(a, b):
+    """Multiply two bytes in GF(2^8)."""
+    result = 0
+
+    for _ in range(8):
+        if b & 1:
+            result ^= a
+
+        high_bit = a & 0x80
+        a = (a << 1) & 0xFF
+
+        if high_bit:
+            a ^= 0x1B
+
+        b >>= 1
+
+    return result
 
 
